@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Marketplace Scrollable</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding-bottom: 80px;
+    }
+
+    header {
+      background-color: #333;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .filters {
+      background: #fff;
+      padding: 10px;
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      border-bottom: 1px solid #ccc;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .filters select {
+      padding: 5px;
+    }
+
+    .product-list {
+      padding: 10px;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-card img {
+      width: 450px;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+    }
+
+    .product-info {
+  padding: 15px;
+  flex-grow: 1;
+  text-align: center; 
+  display: flex;
+  flex-direction: column;
+  align-items: center; /
+}
+
+
+    .product-name {
+      margin: 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .product-price {
+      color: green;
+      margin-top: 5px;
+    }
+
+    .product-meta {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .product-description {
+      display: none;
+      font-size: 14px;
+      margin-top: 10px;
+      color: #444;
+    }
+
+    .toggle-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      margin-top: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .floating-cart {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ff6b00;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 50px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      font-weight: bold;
+      z-index: 20;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Marketplace</h1>
+  </header>
+
+  <!-- Filtros -->
+  <div class="filters">
+    <select id="categoryFilter">
+      <option value="all">Todas las categorías</option>
+      <option value="ropa">Ropa</option>
+      <option value="accesorios">Accesorios</option>
+      <option value="tecnologia">Tecnología</option>
+    </select>
+
+    <select id="priceFilter">
+      <option value="all">Todos los precios</option>
+      <option value="low">Menor a $30</option>
+      <option value="mid">$30 - $70</option>
+      <option value="high">Mayor a $70</option>
+    </select>
+  </div>
+
+  <!-- Lista de productos -->
+  <div class="product-list" id="productList"></div>
+
+  <!-- Barra flotante del carrito -->
+  <div class="floating-cart" onclick="viewCart()">
+    🛒 Ver Carrito (0)
+  </div>
+
+  <script>
+    const products = [
+      {
+        id: 1,
+        name: "Camiseta Blanca",
+        price: 25,
+        category: "ropa",
+        brand: "Massimo Dutti",
+        rating: 4,
+        stock: 12,
+        description: "Camisa de algodón suave, perfecta para ocaciones especiales. Diseño moderno y ligero.",
+        image: "https://cdn.grupoelcorteingles.es/SGFM/dctm/MEDIA03/202211/29/00117905215715____4__516x640.jpg"
+      },
+      {
+        id: 2,
+        name: "Auriculares Bluetooth",
+        price: 59,
+        category: "tecnologia",
+        brand: "HOCO",
+        rating: 5,
+        stock: 8,
+        description: "Auriculares con cancelación de ruido, gran duración de batería y calidad de sonido.",
+        image: "https://factorytech.cl/cdn/shop/files/AURICULARES-INALAMBRICOS-DIADEMA-BLUETOOTH-HOCO-W35-NEGRO-1_84335a7b-19a8-43d6-af24-a29e7e2d4b81_550x550.jpg?v=1715442244"
+      },
+      {
+        id: 3,
+        name: "Gorra Negra",
+        price: 20,
+        category: "accesorios",
+        brand: "Nike",
+        rating: 3,
+        stock: 20,
+        description: "Gorra ajustable con visera curva. Ideal para el sol o el deporte diario.",
+        image: "https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/2be2f23e-b823-4211-b9ba-aac09602a465/U+NK+DF+CLUB+CAP+S+CB+P.png"
+      },
+      {
+        id: 4,
+        name: "Smartwatch",
+        price: 99,
+        category: "tecnologia",
+        brand: "Redlemon",
+        rating: 4,
+        stock: 5,
+        description: "Reloj inteligente con seguimiento de pasos, frecuencia cardíaca y llamadas.",
+        image: "https://de2kqc9pq55cj.cloudfront.net/fit-in/500x500/filters:fill(FFFFFF):quality(90):format(webp)/_img_productos/smartwatch-t800-ultra-blanco-fb-naranja-.jpg"
+      },
+      {
+        id: 5,
+        name: "Mochila Urbana",
+        price: 45,
+        category: "accesorios",
+        brand: "Adidas",
+        rating: 5,
+        stock: 10,
+        description: "Mochila espaciosa con compartimento para laptop. Resistente al agua.",
+        image: "https://m.media-amazon.com/images/I/718f5tAQF8L._AC_SL1500_.jpg"
+      },
+      {
+        id: 6,
+        name: "Chaqueta Impermeable",
+        price: 75,
+        category: "ropa",
+        brand: "The NorthFace",
+        rating: 4,
+        stock: 7,
+        description: "Chaqueta resistente al agua con forro interior cálido. Ideal para el invierno.",
+        image: "https://img01.ztat.net/article/spp-media-p1/2fca88558e0e43b7a9a220bd37b874fa/a0a989692e8c4c89996aa5f404ce5f4f.jpg?imwidth=1800"
+      }
+    ];
+
+    let cart = [];
+
+    function renderProducts() {
+      const category = document.getElementById("categoryFilter").value;
+      const price = document.getElementById("priceFilter").value;
+      const container = document.getElementById("productList");
+      container.innerHTML = "";
+
+      const filtered = products.filter(product => {
+        const categoryMatch = category === "all" || product.category === category;
+        let priceMatch = true;
+        if (price === "low") priceMatch = product.price < 30;
+        else if (price === "mid") priceMatch = product.price >= 30 && product.price <= 70;
+        else if (price === "high") priceMatch = product.price > 70;
+        return categoryMatch && priceMatch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = "<p>No hay productos que coincidan con los filtros.</p>";
+        return;
+      }
+
+      filtered.forEach(product => {
+        const div = document.createElement("div");
+        div.className = "product-card";
+        div.innerHTML = `
+          <img src="${product.image}" alt="${product.name}">
+          <div class="product-info">
+            <p class="product-name">${product.name}</p>
+            <p class="product-price">$${product.price}</p>
+            <p class="product-meta">Marca: ${product.brand} | Stock: ${product.stock}</p>
+            <p class="product-meta">⭐ ${"★".repeat(product.rating)}${"☆".repeat(5 - product.rating)}</p>
+            <button onclick="addToCart(${product.id})">Añadir</button>
+            <button class="toggle-btn" onclick="toggleDescription(this)">Ver más</button>
+            <p class="product-description">${product.description}</p>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function toggleDescription(btn) {
+      const desc = btn.nextElementSibling;
+      const isVisible = desc.style.display === "block";
+      desc.style.display = isVisible ? "none" : "block";
+      btn.innerText = isVisible ? "Ver más" : "Ver menos";
+    }
+
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      cart.push(product);
+      updateCartCount();
+      alert(`${product.name} añadido al carrito`);
+    }
+
+    function updateCartCount() {
+      document.querySelector(".floating-cart").innerText = `🛒 Ver Carrito (${cart.length})`;
+    }
+
+    function viewCart() {
+      if (cart.length === 0) {
+        alert("Tu carrito está vacío.");
+        return;
+      }
+      alert("Productos en el carrito:\n\n" + cart.map(p => `- ${p.name} ($${p.price})`).join("\n"));
+    }
+
+    document.getElementById("categoryFilter").addEventListener("change", renderProducts);
+    document.getElementById("priceFilter").addEventListener("change", renderProducts);
+
+    renderProducts();
+  </script>
+
+</body>
+</html>
